@@ -8,5 +8,45 @@ body {
 }
 
 body {
-  @apply bg-gray-50 text-gray-900 antialiased;
+  @apply bg-parchment text-headline antialiased font-body text-body;
+}
+
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center justify-center px-6 py-3 min-h-[44px]
+      bg-action text-white font-semibold text-body
+      rounded-pill transition-transform duration-100
+      hover:brightness-110 active:scale-[0.95]
+      disabled:opacity-50 disabled:pointer-events-none;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center px-6 py-3 min-h-[44px]
+      bg-transparent text-action border border-action font-semibold text-body
+      rounded-pill transition-transform duration-100
+      hover:bg-action/5 active:scale-[0.95]
+      disabled:opacity-50 disabled:pointer-events-none;
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center px-4 py-2 min-h-[44px]
+      text-action text-body rounded-pill
+      transition-transform duration-100
+      hover:bg-action/5 active:scale-[0.95];
+  }
+
+  .card {
+    @apply bg-canvas border border-border rounded-card p-6;
+  }
+}
+
+@media print {
+  header,
+  nav,
+  .no-print {
+    display: none !important;
+  }
+  body {
+    background: white;
+  }
 }

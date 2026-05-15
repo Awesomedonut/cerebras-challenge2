@@ -17,18 +17,21 @@ export function RoleSwitcher() {
     window.location.reload();
   }
 
-  const label =
-    role === "tech" ? "Switch to manager view" : "Switch to tech view";
-
   return (
     <button
       type="button"
       onClick={handleClick}
-      className="text-sm px-3 py-1.5 rounded-md border border-gray-300 hover:bg-gray-50 min-h-[44px]"
-      aria-label={label}
+      className="text-caption px-3 py-1.5 rounded-pill border border-border
+        hover:bg-parchment active:scale-[0.95] transition-all min-h-[44px]
+        flex items-center gap-2"
+      aria-label={role === "tech" ? "Switch to manager view" : "Switch to tech view"}
     >
-      <span className="text-gray-500 mr-2">role: {role}</span>
-      <span className="font-medium">{label}</span>
+      <span className="text-muted">
+        {role === "tech" ? "tech-jane" : "manager-paul"}
+      </span>
+      <span className="text-action font-medium">
+        {role === "tech" ? "Switch to Manager" : "Switch to Tech"}
+      </span>
     </button>
   );
 }

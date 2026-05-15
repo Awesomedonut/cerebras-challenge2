@@ -12,6 +12,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "html5-qrcode": "^2.3.8",
+    "jsbarcode": "^3.12.3",
     "next": "15.0.4",
     "react": "19.0.0",
     "react-dom": "19.0.0"
