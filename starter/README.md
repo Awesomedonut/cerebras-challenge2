@@ -1,105 +1,110 @@
-# Asset tracking — challenge starter
+# Asset Tracking
 
-Welcome. **Read [`../docs/CHALLENGE.md`](../docs/CHALLENGE.md) first** — it explains what you're building. If you want more narrative on *why* this kind of system exists, [`../docs/CONTEXT.md`](../docs/CONTEXT.md) is optional background.
+A frontend for a multi-site research lab asset tracking system. Technicians scan assets through receiving, storage, deployment, and custody transfer. Managers monitor the fleet and run three-way reconciliation across operations, facilities, and finance.
 
-This README is operational: how to install, run, and deploy.
+Built with Next.js 15 (App Router), TypeScript, and Tailwind CSS.
 
-## One-click deploy
+**Live demo:** [TODO: Vercel URL]
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FREPLACE_WITH_YOUR_REPO%2Fasset-tracking-challenge%2Ftree%2Fmain%2Fstarter&env=API_BASE_URL,API_TOKEN&envDescription=Provided%20with%20your%20challenge%20brief)
-
-(If you're forking and submitting, update the URL above to point at your fork.)
-
-## Quick start
+## Running locally
 
 ```bash
-# From the monorepo root
 pnpm install
-pnpm dev
-# API on :8080, starter on :3000
+pnpm dev          # API on :8080, starter on :3000
 ```
 
-Or from this directory:
-
-```bash
-pnpm install      # if you haven't from the root
-cp .env.example .env
-# Edit .env with the API URL and token from your challenge email
-pnpm dev
-```
-
-Open http://localhost:3000.
-
-The starter expects the upstream API at `API_BASE_URL` (default `http://localhost:8080/v1`). Browser requests go through a same-origin proxy at `/api/upstream/*` — the proxy attaches the bearer token server-side, so `API_TOKEN` never reaches the client.
-
-## What's prebuilt
-
-| File | What |
-|---|---|
-| `lib/api-client.ts` | Typed wrapper around every `/v1/*` endpoint. In the browser it talks to `/api/upstream`; on the server it goes directly to `API_BASE_URL`. Throws `ApiError` with the structured error payload. |
-| `lib/types.ts` | TypeScript mirror of the API schemas. |
-| `lib/auth.ts` | Cookie-based role switcher between `tech-jane` and `manager-paul`. |
-| `components/ScanInput.tsx` | Auto-focus, Enter-to-submit, glove-sized input. Use it or replace it. |
-| `components/RoleSwitcher.tsx` | Header button to swap roles. |
-| `app/api/upstream/[...path]/route.ts` | Same-origin proxy that adds the bearer token. Don't modify unless you have a reason. |
-| `app/page.tsx` | Landing page. |
-| `docs/api-reference.md` | API contract. |
-| `docs/tips.md` | Notes you'll want to read before coding. |
-| `docs/happy-path.md` | 10-step smoke test. Run before submitting. |
-
-## What you'll build
-
-These files are stubs you'll replace. Read [`../docs/CHALLENGE.md`](../docs/CHALLENGE.md) for the requirements behind each.
-
-**Tech (mobile-first scan workflows):**
-
-| File | Build |
-|---|---|
-| `app/tech/receive/page.tsx` | The dock-side receive scan. New tag → create. Duplicate tag + matching serial → idempotent. Duplicate tag + different serial → loud error. |
-| `app/tech/store/page.tsx` | Asset scan → storage location scan → commit. |
-| `app/tech/deploy/page.tsx` | Asset scan → deploy location scan (must include rack + ru) → commit. Should also write back to facilities + finance. |
-| `app/tech/transfer/page.tsx` | Asset scan → receiving party's badge scan → custodian changes; state doesn't. |
-| `app/tech/page.tsx` | Optional tech landing page. |
-
-**Manager (desktop):**
-
-| File | Build |
-|---|---|
-| `app/manager/page.tsx` | Asset list. Filter by state / site / custodian. Links to detail. |
-| `app/manager/assets/[tag]/page.tsx` | Asset detail. Current state + event history. |
-| `app/manager/reconcile/page.tsx` | Renders the reconciliation report from the route handler below. |
-| `app/api/reconcile/route.ts` | **Server-side join.** Pulls ops, facilities, and finance. Classifies. Returns a structured report. Currently returns 501. |
-
-**Barcode tooling (your call where it lives):**
-
-A way to produce scannable barcodes for a handful of asset tags (pick interesting ones) + a handful of locations. Could be `app/dev/barcodes/page.tsx`, a printable PDF, a script under `scripts/`, whatever fits.
-
-**Your README:**
-
-A `README.md` at the root of your fork. Include:
-
-- A **"Three calls I nearly made the other way"** section.
-- Anything in the brief or starter you'd push back on — bugs, typos, confusing claims. Pushback is a positive signal.
-- How to run your app locally and what env vars it needs.
-
-## Scripts
-
-```bash
-pnpm dev          # Next dev server
-pnpm build        # Production build
-pnpm start        # Run the production build
-pnpm typecheck    # tsc --noEmit
-pnpm test         # Vitest
-pnpm lint         # next lint
-```
-
-## Environment variables
+Copy `starter/.env.example` to `starter/.env` if you don't have one. The defaults work for local development.
 
 | Variable | Notes |
 |---|---|
-| `API_BASE_URL` | Upstream API including `/v1`, e.g. `http://localhost:8080/v1` |
-| `API_TOKEN` | Server-only. Do **not** prefix with `NEXT_PUBLIC_`. Browser code hits `/api/upstream/*` instead. |
+| `API_BASE_URL` | Upstream API including `/v1`. Default: `http://localhost:8080/v1` |
+| `API_TOKEN` | Server-only bearer token. Never prefixed with `NEXT_PUBLIC_`. Browser code goes through `/api/upstream/*` which attaches it. |
 
-## Submitting
+```bash
+pnpm test         # 13 tests (ScanInput + reconciliation)
+pnpm typecheck    # tsc --noEmit
+```
 
-Fill out **https://forms.gle/6gxhe8Js98KGqSDx8** with your deployed URL, repo link, and 3–5 minute Loom. Full details in [`../docs/CHALLENGE.md`](../docs/CHALLENGE.md).
+## What I built
+
+- **Scan workflows** (`/tech/*`) -- Receive, store, deploy, transfer. Step-based flows with asset preview between scans, large success indicators with haptic feedback, and error recovery that preserves context (bad location? rescan it without starting over).
+- **Manager dashboard** (`/manager`) -- Asset list with state-count summary bar, filters (state/site/custodian), sorting, pagination at 25/page. Desktop table, mobile card view. Asset detail pages with event timeline.
+- **Three-way reconciliation** (`/manager/reconcile`) -- Server-side join at `/api/reconcile` classifying every cross-system disagreement into three tiers (action required, needs review, expected) with recommended next steps for each category.
+- **Write-back routes** (`/api/scans/deploy`, `/api/scans/store`) -- Deploy writes to facilities and finance. Store-from-in-service de-racks in facilities. Write-back failures surface as warnings, not silent swallows.
+- **Barcode page** (`/dev/barcodes`) -- Code 128 barcodes for asset tags (covering every planted drift case), location strings, and badges. Printable.
+- **Camera scanning** -- Phone camera barcode scanning via html5-qrcode, alongside standard keyboard/USB scanner input.
+
+## Three calls I nearly made the other way
+
+### 1. Server-side scan routes vs. browser-side write-backs
+
+I could have fired the facilities/finance POSTs directly from the browser through the existing `/api/upstream` proxy. It would have been simpler -- no new route files, no extra abstraction. I chose dedicated server-side routes for deploy and store because the write-back logic is an orchestration concern: "if deploy succeeds, then write to facilities and finance in parallel, surface failures as warnings." Putting that in the browser means the token reaches the client, and it splits the orchestration across client and server. The reconcile route already established the pattern of keeping multi-system joins server-side for token security. Deploy and store write-backs follow the same argument.
+
+I did *not* create server-side routes for receive and transfer. They have no write-backs, so the existing `/api/upstream` proxy handles them fine. Adding pass-through routes would have been unnecessary surface area.
+
+### 2. Client-side pagination vs. server-side
+
+The API returns all ~1,000 assets in one response with no pagination parameters. I paginate client-side at 25 per page. The alternative was to add server-side pagination (cursor or offset) by extending the proxy. I decided against it because: the dataset is small enough that a single fetch is fast (~200ms), client-side filtering and sorting are instant after the first load, and adding pagination to the proxy would mean either caching state on the server or re-fetching on every page change. For 1,000 rows, the simpler approach wins. If the dataset grew to 50k, I'd revisit.
+
+### 3. Shared scan reducer factory vs. separate reducers per page
+
+Each scan page has its own `useReducer` with its own types and step definitions. A factory function could generate these from a config object, reducing boilerplate. I kept them separate because: each workflow has different steps (receive has a form, transfer has a badge scan, deploy has location validation), the reducer logic diverges enough that a generic factory would need escape hatches everywhere, and having the full state machine visible in each file makes it easy to understand the flow without jumping to an abstraction. Three similar files are better than one clever file that's hard to follow.
+
+## Pushback on the brief and starter
+
+### localhost vs 127.0.0.1
+
+The `.env.example` defaults to `http://localhost:8080/v1`, but the Fastify server binds to `0.0.0.0`, which on macOS resolves `localhost` to `::1` (IPv6) first. Node's `fetch` then connects to IPv6, which the server accepts, but `curl` and some environments get connection resets. Using `127.0.0.1` is more reliable. This cost me debugging time.
+
+### The brief says "three scan endpoints" but there are four
+
+The "How this works" section says "three scan endpoints (receive, store, deploy)" but transfer is also a scan endpoint. It was added later (the git history shows it). The endpoint list in the API reference is correct; the overview paragraph is stale.
+
+### Duplicate receive detection is ambiguous
+
+When you receive a tag that already exists with the same serial, the API returns 200 with the existing asset. There's no field in the response distinguishing "this was a duplicate" from "this was new." I heuristically check if `created_at` is older than 5 seconds ago, which works but feels fragile. A `was_duplicate: boolean` field in the response would be cleaner.
+
+### The `scan_payload` field's purpose is unclear
+
+Every scan endpoint requires `scan_payload` but the brief never explains what it's for. Looking at the event log, it's stored verbatim as audit evidence. The field name suggests it's the raw scanner output, but the brief could say that explicitly. I set it to the raw scanned string in all cases.
+
+## What I chose not to build
+
+- **Offline mode / scan queueing.** The brief explicitly says not to. But the architecture doesn't prevent it -- scan pages are self-contained and could queue to IndexedDB.
+- **Bulk operations.** No multi-select, no "store all received assets." A manager with 50 received assets would want this, but the brief says skip it and the API doesn't support batch endpoints.
+- **Rate limit retry logic.** The API is rate-limited at 60 req/min. I don't retry on 429. A tech doing rapid scans could hit it, but the brief says backend hardening is out of scope. I show the error message from the API rather than silently retrying.
+- **RMA workflow UI.** The state machine supports rma_open and rma_receive_back, but the brief says no UI needed. The scan page architecture (step-based reducer + ScanInput) could accommodate it without structural changes.
+- **Parent-child asset relationships.** The data model has `parent_asset_tag` but no assets use it in the seed data. Building a hierarchy view without test data would be speculative.
+
+## Architecture
+
+```
+Browser                          Server (Next.js)              API (Fastify/SQLite)
+  |                                  |                              |
+  |-- /tech/deploy (scan) ---------> /api/scans/deploy ----------> POST /v1/scans/deploy
+  |                                  |-- (on success) -----------> POST /v1/mock/facilities/spaces
+  |                                  |-- (on success) -----------> POST /v1/mock/finance/equipment
+  |                                  |<-- asset + sync_warnings
+  |<-- render success/warning        |
+  |                                  |
+  |-- /tech/receive (scan) --------> /api/upstream/scans/receive -> POST /v1/scans/receive
+  |<-- render result                 |   (pass-through proxy)
+  |                                  |
+  |-- /manager/reconcile ----------> /api/reconcile
+  |                                  |-- GET /v1/assets
+  |                                  |-- GET /v1/mock/facilities/spaces
+  |                                  |-- GET /v1/mock/finance/equipment
+  |                                  |<-- classify + return report
+  |<-- render report                 |
+```
+
+Write-backs live in server-side route handlers so the API token never reaches the browser. Same security argument as the reconcile route.
+
+## Testing
+
+13 tests across two suites:
+
+- **ScanInput** (3 tests) -- fires on Enter with trimmed value, ignores empty submissions, clears input after firing.
+- **Reconciliation** (10 tests) -- every drift category (location drift, disposed-but-capitalized, ghost in facilities, finance orphan, stale facilities, missing from finance, expected absences), the multi-category case (C0000109 appears in both disposed_but_capitalized and stale_facilities), and the 502 error when the API is unreachable.
+
+I tested the reconciliation join because it's the most complex logic and the spec calls it "the testable part." I did not unit-test individual scan pages because their logic is thin -- the API enforces the state machine, and the pages are mostly wiring.
