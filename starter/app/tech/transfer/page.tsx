@@ -6,6 +6,7 @@ import { Alert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
 import { AssetInfoCard } from "@/components/scan/AssetInfoCard";
 import { SubmittingState } from "@/components/scan/SubmittingState";
+import { ScanSuccess } from "@/components/scan/ScanSuccess";
 import { api, ApiError } from "@/lib/api-client";
 import { getCurrentUserId } from "@/lib/auth";
 import { handleTagLookupError } from "@/lib/scan-errors";
@@ -29,6 +30,8 @@ type Action =
   | { type: "SUBMIT" }
   | { type: "SUCCESS"; result: Asset; previousCustodian: string }
   | { type: "ERROR"; title: string; detail: string }
+  | { type: "RETRY_BADGE" }
+  | { type: "RETRY_TAG" }
   | { type: "RESET" };
 
 const INITIAL: State = {
@@ -55,6 +58,10 @@ function reducer(state: State, action: Action): State {
       return { ...state, step: "success", result: action.result, previousCustodian: action.previousCustodian, error: null };
     case "ERROR":
       return { ...state, step: "error", error: { title: action.title, detail: action.detail } };
+    case "RETRY_BADGE":
+      return { ...state, step: "scan_badge", error: null };
+    case "RETRY_TAG":
+      return { ...INITIAL, step: "scan_tag" };
     case "RESET":
       return INITIAL;
   }
@@ -105,6 +112,10 @@ export default function TechTransferPage() {
     }
   }
 
+  // Same-custodian errors let you rescan the badge without re-scanning the tag
+  const isBadgeError = state.step === "error" && state.asset &&
+    state.error?.title === "Same custodian";
+
   return (
     <div className="max-w-lg mx-auto space-y-6">
       <div>
@@ -119,7 +130,7 @@ export default function TechTransferPage() {
         <ScanInput onScan={handleTagScan} label="Scan asset tag" />
       )}
 
-      {state.asset && state.step !== "scan_tag" && (
+      {state.asset && state.step !== "scan_tag" && state.step !== "success" && (
         <AssetInfoCard asset={state.asset} highlightCustodian />
       )}
 
@@ -133,18 +144,31 @@ export default function TechTransferPage() {
       )}
 
       {state.step === "error" && state.error && (
-        <Alert variant="error" title={state.error.title} onDismiss={() => dispatch({ type: "RESET" })}>
-          {state.error.detail}
-        </Alert>
+        <div className="space-y-3">
+          <Alert variant="error" title={state.error.title}>
+            {state.error.detail}
+          </Alert>
+          <div className="flex gap-3">
+            {isBadgeError ? (
+              <Button onClick={() => dispatch({ type: "RETRY_BADGE" })}>
+                Scan a different badge
+              </Button>
+            ) : (
+              <Button onClick={() => dispatch({ type: "RETRY_TAG" })}>
+                Scan a different tag
+              </Button>
+            )}
+          </div>
+        </div>
       )}
 
       {state.step === "success" && state.result && (
         <div className="space-y-4">
-          <Alert variant="success" title="Custody transferred">
-            <strong>{state.result.asset_tag}</strong> transferred from{" "}
+          <ScanSuccess title="Transferred">
+            <strong>{state.result.asset_tag}</strong> custody moved from{" "}
             <strong>{state.previousCustodian}</strong> to{" "}
-            <strong>{state.result.custodian}</strong>. State unchanged ({state.result.state}).
-          </Alert>
+            <strong>{state.result.custodian}</strong>
+          </ScanSuccess>
           <Button onClick={() => dispatch({ type: "RESET" })}>Scan Another</Button>
         </div>
       )}

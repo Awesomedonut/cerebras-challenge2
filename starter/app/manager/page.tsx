@@ -9,6 +9,15 @@ import { FullPageSpinner } from "@/components/ui/Spinner";
 import { Button } from "@/components/ui/Button";
 import type { Asset, AssetState } from "@/lib/types";
 
+const STATE_LABELS: Record<AssetState, string> = {
+  in_service: "In Service",
+  stored: "Stored",
+  received: "Received",
+  rma_pending: "RMA",
+  disposed: "Disposed",
+  unreceived: "Unreceived",
+};
+
 const STATES: AssetState[] = [
   "in_service",
   "stored",
@@ -53,6 +62,13 @@ export default function ManagerListPage() {
     () => [...new Set(assets.map((a) => a.location.site))].sort(),
     [assets],
   );
+
+  // State counts for summary bar
+  const stateCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    for (const a of assets) counts[a.state] = (counts[a.state] || 0) + 1;
+    return counts;
+  }, [assets]);
 
   // Filter
   const filtered = useMemo(() => {
@@ -124,6 +140,23 @@ export default function ManagerListPage() {
         <Link href="/manager/reconcile" className="btn-secondary text-caption px-4 py-2">
           Reconciliation Report
         </Link>
+      </div>
+
+      {/* Summary bar -- what a manager needs in 60 seconds */}
+      <div className="flex flex-wrap gap-2">
+        {STATES.filter((s) => stateCounts[s]).map((s) => (
+          <button
+            key={s}
+            onClick={() => setStateFilter(stateFilter === s ? "" : s)}
+            className={`px-3 py-1.5 rounded-pill text-caption border transition-colors ${
+              stateFilter === s
+                ? "bg-action text-white border-action"
+                : "bg-canvas border-border hover:border-action text-headline"
+            }`}
+          >
+            {STATE_LABELS[s]} <span className="font-semibold">{stateCounts[s]}</span>
+          </button>
+        ))}
       </div>
 
       {/* Filters */}

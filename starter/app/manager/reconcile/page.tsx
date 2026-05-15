@@ -19,41 +19,48 @@ type Report = {
 
 const CATEGORY_META: Record<
   string,
-  { label: string; description: string; color: string }
+  { label: string; description: string; action: string; color: string }
 > = {
   location_drift: {
     label: "Location Mismatch",
     description: "Operations and facilities disagree on where this asset is racked.",
+    action: "Send a tech to verify the physical location and update whichever system is wrong.",
     color: "bg-red-50 border-red-200 text-red-800",
   },
   disposed_but_capitalized: {
     label: "Disposed but Still Capitalized",
-    description: "Operations marked this disposed, but finance still shows it as capitalized.",
+    description: "Operations marked this disposed, but finance still shows it capitalized.",
+    action: "Contact finance to retire this asset and remove it from the books.",
     color: "bg-red-50 border-red-200 text-red-800",
   },
   ghost_in_facilities: {
     label: "Unknown to Operations",
     description: "Facilities has a record for this tag, but operations has no matching asset.",
+    action: "Check if this asset was received outside the system. If not, remove the facilities record.",
     color: "bg-red-50 border-red-200 text-red-800",
   },
   finance_orphan: {
     label: "Unknown to Operations (Finance)",
     description: "Finance has a record for this tag, but operations has no matching asset.",
+    action: "Verify the purchase order. The asset may not have been received yet, or the tag may be wrong.",
     color: "bg-red-50 border-red-200 text-red-800",
   },
   stale_facilities: {
     label: "Stale Facilities Record",
     description: "This asset is no longer in service, but facilities still shows it racked.",
+    action: "Update facilities to reflect the current state. This may be a timing lag or a missed de-rack.",
     color: "bg-amber-50 border-amber-200 text-amber-800",
   },
   missing_from_finance: {
     label: "Missing from Finance",
     description: "This asset exists in operations but has no finance record.",
+    action: "Check if a purchase order exists. May need to be added to the finance system.",
     color: "bg-amber-50 border-amber-200 text-amber-800",
   },
   stale_observation: {
     label: "Stale Observation",
-    description: "Facilities record exists but hasn't been observed in over 90 days compared to peers.",
+    description: "Facilities record exists but hasn't been observed in over 90 days.",
+    action: "Schedule a physical audit of this rack position to confirm the asset is still there.",
     color: "bg-amber-50 border-amber-200 text-amber-800",
   },
 };
@@ -84,6 +91,7 @@ function CategorySection({
             <span className="ml-2 font-normal text-caption">({items.length})</span>
           </h3>
           <p className="text-caption opacity-80 mt-0.5">{meta.description}</p>
+          <p className="text-caption font-medium mt-0.5">Next step: {meta.action}</p>
         </div>
         <svg
           width="20"

@@ -6,6 +6,7 @@ import { Alert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { SubmittingState } from "@/components/scan/SubmittingState";
+import { ScanSuccess } from "@/components/scan/ScanSuccess";
 import { api, ApiError } from "@/lib/api-client";
 import { getCurrentUserId } from "@/lib/auth";
 import { parseLocation } from "@/lib/parse-location";
@@ -133,9 +134,12 @@ export default function TechReceivePage() {
 
       {/* Error */}
       {state.step === "error" && state.error && (
-        <Alert variant="error" title={state.error.title} onDismiss={() => dispatch({ type: "RESET" })}>
-          {state.error.detail}
-        </Alert>
+        <div className="space-y-3">
+          <Alert variant="error" title={state.error.title}>
+            {state.error.detail}
+          </Alert>
+          <Button onClick={() => dispatch({ type: "RESET" })}>Start over</Button>
+        </div>
       )}
 
       {/* Step 2: Details form */}
@@ -232,13 +236,15 @@ function ReceiveSuccess({ asset, isDuplicate, onReset }: {
 }) {
   return (
     <div className="space-y-4">
-      <Alert variant={isDuplicate ? "info" : "success"} title={isDuplicate ? "Already received" : "Asset received"}>
-        {isDuplicate ? (
-          <span><strong>{asset.asset_tag}</strong> was already in the system with matching serial. Duplicate scan logged.</span>
-        ) : (
-          <span><strong>{asset.asset_tag}</strong> is now in the system.</span>
-        )}
-      </Alert>
+      {isDuplicate ? (
+        <Alert variant="info" title="Already received">
+          <strong>{asset.asset_tag}</strong> was already in the system with matching serial. Duplicate scan logged.
+        </Alert>
+      ) : (
+        <ScanSuccess title="Received">
+          <strong>{asset.asset_tag}</strong> ({asset.serial}) is now in the system
+        </ScanSuccess>
+      )}
 
       <div className="card">
         <div className="flex items-center gap-3 mb-3">

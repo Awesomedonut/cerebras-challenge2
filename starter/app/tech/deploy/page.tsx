@@ -7,10 +7,11 @@ import { Button } from "@/components/ui/Button";
 import { AssetInfoCard } from "@/components/scan/AssetInfoCard";
 import { SubmittingState } from "@/components/scan/SubmittingState";
 import { SyncWarnings } from "@/components/scan/SyncWarnings";
+import { ScanSuccess } from "@/components/scan/ScanSuccess";
 import { api } from "@/lib/api-client";
 import { scanClient, type ScanResponse } from "@/lib/scan-client";
 import { getCurrentUserId } from "@/lib/auth";
-import { parseLocation, isDeployComplete } from "@/lib/parse-location";
+import { parseLocation, isDeployComplete, formatLocation } from "@/lib/parse-location";
 import { handleTagLookupError, handleScanSubmitError } from "@/lib/scan-errors";
 import type { Asset } from "@/lib/types";
 
@@ -31,7 +32,9 @@ type Action =
   | { type: "SUBMIT" }
   | { type: "SUCCESS"; result: ScanResponse }
   | { type: "ERROR"; title: string; detail: string }
-  | { type: "RESET" };
+  | { type: "RESET" }
+  | { type: "RETRY_LOCATION" }
+  | { type: "RETRY_TAG" };
 
 const INITIAL: State = { step: "scan_tag", asset: null, result: null, error: null };
 const DEPLOYABLE = new Set(["received", "stored"]);
@@ -54,6 +57,10 @@ function reducer(state: State, action: Action): State {
       return { ...state, step: "success", result: action.result, error: null };
     case "ERROR":
       return { ...state, step: "error", error: { title: action.title, detail: action.detail } };
+    case "RETRY_LOCATION":
+      return { ...state, step: "scan_location", error: null };
+    case "RETRY_TAG":
+      return { ...INITIAL, step: "scan_tag" };
     case "RESET":
       return INITIAL;
   }
@@ -114,6 +121,10 @@ export default function TechDeployPage() {
     }
   }
 
+  // Incomplete location errors let you rescan the location without re-scanning the tag
+  const isLocationError = state.step === "error" && state.asset &&
+    state.error?.title === "Incomplete location";
+
   return (
     <div className="max-w-lg mx-auto space-y-6">
       <div>
@@ -125,7 +136,7 @@ export default function TechDeployPage() {
         <ScanInput onScan={handleTagScan} label="Scan asset tag" />
       )}
 
-      {state.asset && state.step !== "scan_tag" && (
+      {state.asset && state.step !== "scan_tag" && state.step !== "success" && (
         <AssetInfoCard asset={state.asset} />
       )}
 
@@ -139,16 +150,30 @@ export default function TechDeployPage() {
       )}
 
       {state.step === "error" && state.error && (
-        <Alert variant="error" title={state.error.title} onDismiss={() => dispatch({ type: "RESET" })}>
-          {state.error.detail}
-        </Alert>
+        <div className="space-y-3">
+          <Alert variant="error" title={state.error.title}>
+            {state.error.detail}
+          </Alert>
+          <div className="flex gap-3">
+            {isLocationError ? (
+              <Button onClick={() => dispatch({ type: "RETRY_LOCATION" })}>
+                Scan location again
+              </Button>
+            ) : (
+              <Button onClick={() => dispatch({ type: "RETRY_TAG" })}>
+                Scan a different tag
+              </Button>
+            )}
+          </div>
+        </div>
       )}
 
       {state.step === "success" && state.result && (
         <div className="space-y-4">
-          <Alert variant="success" title="Asset deployed">
-            <strong>{state.result.asset_tag}</strong> is now in service.
-          </Alert>
+          <ScanSuccess title="Deployed">
+            <strong>{state.result.asset_tag}</strong> is now in service at{" "}
+            {formatLocation(state.result.location)}
+          </ScanSuccess>
           <SyncWarnings warnings={state.result.sync_warnings} />
           <Button onClick={() => dispatch({ type: "RESET" })}>Scan Another</Button>
         </div>
