@@ -4,7 +4,7 @@ A frontend for a multi-site research lab asset tracking system. Technicians scan
 
 Built with Next.js 15 (App Router), TypeScript, and Tailwind CSS.
 
-**Live demo:** [TODO: Vercel URL]
+**Live demo:** http://ec2-3-99-80-107.ca-central-1.compute.amazonaws.com
 
 ## Running locally
 
