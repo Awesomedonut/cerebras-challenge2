@@ -121,8 +121,8 @@ export default function TechTransferPage() {
       <div>
         <h1 className="font-display font-semibold text-tagline text-headline">Transfer Custody</h1>
         <p className="text-caption text-muted mt-1">
-          Scan the asset, then scan the receiving party's badge.
-          You ({getCurrentUserId()}) are the outgoing custodian.
+          Scan the asset, then scan the receiving party&apos;s badge.
+          This transfer will be logged under {getCurrentUserId()}.
         </p>
       </div>
 

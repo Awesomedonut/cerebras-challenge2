@@ -114,12 +114,19 @@ function CategorySection({
               className="bg-white/60 rounded-card p-3 text-caption flex items-center justify-between gap-4"
             >
               <div className="min-w-0">
-                <Link
-                  href={`/manager/assets/${tag(item)}`}
-                  className="font-mono font-semibold text-action hover:underline"
-                >
-                  {tag(item)}
-                </Link>
+                {item.asset_tag ? (
+                  <Link
+                    href={`/manager/assets/${tag(item)}`}
+                    className="font-mono font-semibold text-action hover:underline"
+                  >
+                    {tag(item)}
+                  </Link>
+                ) : (
+                  <span className="font-mono font-semibold text-headline">
+                    {tag(item)}
+                    <span className="ml-2 text-muted font-normal text-fine-print">not in operations</span>
+                  </span>
+                )}
                 <div className="text-muted mt-0.5 space-x-3">
                   {Object.entries(item)
                     .filter(
