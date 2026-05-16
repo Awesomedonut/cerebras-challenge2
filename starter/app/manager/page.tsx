@@ -46,8 +46,8 @@ export default function ManagerListPage() {
   const [page, setPage] = useState(1);
 
   // Sorting
-  const [sortKey, setSortKey] = useState<SortKey>("asset_tag");
-  const [sortDir, setSortDir] = useState<SortDir>("asc");
+  const [sortKey, setSortKey] = useState<SortKey>("updated_at");
+  const [sortDir, setSortDir] = useState<SortDir>("desc");
 
   useEffect(() => {
     api.assets
