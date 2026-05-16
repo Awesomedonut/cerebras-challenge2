@@ -64,6 +64,10 @@ The "How this works" section says "three scan endpoints (receive, store, deploy)
 
 When you receive a tag that already exists with the same serial, the API returns 200 with the existing asset. There's no field in the response distinguishing "this was a duplicate" from "this was new." I heuristically check if `created_at` is older than 5 seconds ago, which works but feels fragile. A `was_duplicate: boolean` field in the response would be cleaner.
 
+### Deployment instructions are inconsistent with the challenge email
+
+[`starter/README.md`](https://github.com/danielkim-cerebras/ai-builder-challenge/blob/main/starter/README.md) says "Edit .env with the API URL and token from your challenge email," implying a hosted API and token would be provided. The challenge email contained neither. After emailing Daniel to clarify, he confirmed candidates should deploy the API themselves.
+
 ### The `scan_payload` field's purpose is unclear
 
 Every scan endpoint requires `scan_payload` but the brief never explains what it's for. Looking at the event log, it's stored verbatim as audit evidence. The field name suggests it's the raw scanner output, but the brief could say that explicitly. I set it to the raw scanned string in all cases.
