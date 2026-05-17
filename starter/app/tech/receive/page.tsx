@@ -196,26 +196,19 @@ function ReceiveForm({ tag, onSubmit, onCancel }: {
           </select>
         </label>
 
-        <div>
+        <label className="block">
           <span className="block text-caption-strong font-semibold text-headline mb-1">Location</span>
-          <ScanInput
-            onScan={(v) => {
-              if (locationRef.current) locationRef.current.value = v;
-            }}
-            label="" placeholder="Scan location barcode or type (e.g. Lab-Building-A/Receiving//DOCK-2/)"
-            autoFocus={false}
-          />
-          <input ref={locationRef} name="location" required
-            className="peer w-full p-3 rounded-card border border-border text-body focus:border-action focus:outline-none mt-2
+          <input ref={locationRef} name="location" required autoComplete="off"
+            className="peer w-full p-3 rounded-card border border-border text-body focus:border-action focus:outline-none
               invalid:[&:not(:placeholder-shown)]:border-red-400"
             placeholder="Lab-Building-A/Receiving//DOCK-2/" />
           <span className="hidden peer-[&:not(:placeholder-shown)]:peer-invalid:block text-fine-print text-red-500 mt-1">
             Location is required
           </span>
           <p className="text-fine-print text-muted mt-1">
-            Format: site/room/row/rack/ru -- leave segments empty for nulls
+            Format: site/room/row/rack/ru
           </p>
-        </div>
+        </label>
       </div>
 
       <div className="flex gap-3 pt-2">
