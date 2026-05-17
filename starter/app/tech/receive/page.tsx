@@ -1,6 +1,6 @@
 "use client";
 
-import { useReducer } from "react";
+import { useReducer, useRef } from "react";
 import { ScanInput } from "@/components/ScanInput";
 import { Alert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
@@ -112,7 +112,10 @@ export default function TechReceivePage() {
         user_id: getCurrentUserId(),
         scan_payload: state.tag,
       });
-      const isDuplicate = new Date(asset.created_at).getTime() < Date.now() - 5000;
+      // The API returns 201 for new, 200 for duplicate, but the api-client
+      // doesn't expose the status code. We compare created_at to updated_at:
+      // if they differ, the asset existed before this request.
+      const isDuplicate = asset.created_at !== asset.updated_at;
       dispatch({ type: "SUCCESS", asset, isDuplicate });
     } catch (err) {
       dispatch({ type: "ERROR", ...classifyReceiveError(err, state.tag) });
@@ -168,6 +171,8 @@ function ReceiveForm({ tag, onSubmit, onCancel }: {
   onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
   onCancel: () => void;
 }) {
+  const locationRef = useRef<HTMLInputElement>(null);
+
   return (
     <form onSubmit={onSubmit} className="card space-y-4">
       <div className="flex items-center gap-3 pb-3 border-b border-border">
@@ -195,13 +200,12 @@ function ReceiveForm({ tag, onSubmit, onCancel }: {
           <span className="block text-caption-strong font-semibold text-headline mb-1">Location</span>
           <ScanInput
             onScan={(v) => {
-              const input = document.querySelector<HTMLInputElement>('input[name="location"]');
-              if (input) input.value = v;
+              if (locationRef.current) locationRef.current.value = v;
             }}
             label="" placeholder="Scan location barcode or type (e.g. Lab-Building-A/Receiving//DOCK-2/)"
             autoFocus={false}
           />
-          <input name="location" required
+          <input ref={locationRef} name="location" required
             className="w-full p-3 rounded-card border border-border text-body focus:border-action focus:outline-none mt-2"
             placeholder="Lab-Building-A/Receiving//DOCK-2/" />
           <p className="text-fine-print text-muted mt-1">

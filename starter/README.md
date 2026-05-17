@@ -62,7 +62,7 @@ The "How this works" section says "three scan endpoints (receive, store, deploy)
 
 ### Duplicate receive detection is ambiguous
 
-When you receive a tag that already exists with the same serial, the API returns 200 with the existing asset. There's no field in the response distinguishing "this was a duplicate" from "this was new." I heuristically check if `created_at` is older than 5 seconds ago, which works but feels fragile. A `was_duplicate: boolean` field in the response would be cleaner.
+When you receive a tag that already exists with the same serial, the API returns 200 with the existing asset. There's no field in the response distinguishing "this was a duplicate" from "this was new." I compare `created_at` to `updated_at` -- they differ for duplicates because the `duplicate_receive` event updates the timestamp. A `was_duplicate: boolean` field in the response would be more explicit.
 
 ### Deployment instructions are inconsistent with the challenge email
 
