@@ -53,7 +53,7 @@ function Barcode({ value }: { value: string }) {
     return () => { cancelled = true; };
   }, [value]);
 
-  return <svg ref={svgRef} />;
+  return <svg ref={svgRef} className="max-w-full h-auto" />;
 }
 
 // --- Section component ---
@@ -72,7 +72,7 @@ function BarcodeSection({
       </h2>
       <div className="grid sm:grid-cols-2 gap-4">
         {items.map((item) => (
-          <div key={item.value} className="card text-center">
+          <div key={item.value} className="card text-center overflow-hidden">
             <Barcode value={item.value} />
             <p className="text-caption text-muted mt-2">{item.note}</p>
           </div>
