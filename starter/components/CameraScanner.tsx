@@ -24,7 +24,7 @@ class CameraErrorBoundary extends Component<
   render() {
     if (this.state.hasError) {
       return (
-        <div className="fixed inset-0 z-[100] bg-black/90 flex flex-col items-center justify-center">
+        <div className="fixed inset-0 z-[100] bg-black flex flex-col items-center justify-center">
           <div className="w-full max-w-md px-4 text-center">
             <div className="bg-red-900/50 text-red-200 rounded-card p-6 text-body">
               <p className="font-semibold mb-2">Camera unavailable</p>
@@ -86,10 +86,10 @@ function CameraScannerInner({ onScan, onClose }: CameraScannerProps) {
         );
       } catch (err) {
         if (!cancelled) {
-          const message =
-            err instanceof DOMException && err.name === "NotAllowedError"
-              ? "Camera permission denied. Allow camera access in your browser settings, or close this and type the value manually."
-              : "Could not access camera. Check permissions and try again, or close this and use the text input.";
+          const isDenied = err instanceof DOMException && err.name === "NotAllowedError";
+          const message = isDenied
+              ? "Camera permission was denied. To fix: tap the lock/camera icon in your browser's address bar, allow camera access, and reload the page. Or close this and type the value manually."
+              : "Could not access camera. Your device may not have a camera, or another app may be using it. Close this and type the value manually.";
           setError(message);
         }
       }
@@ -104,7 +104,7 @@ function CameraScannerInner({ onScan, onClose }: CameraScannerProps) {
   }, [onScan]);
 
   return (
-    <div className="fixed inset-0 z-[100] bg-black/90 flex flex-col items-center justify-center">
+    <div className="fixed inset-0 z-[100] bg-black flex flex-col items-center justify-center">
       <div className="w-full max-w-md px-4">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-white font-display font-semibold text-body-strong">
