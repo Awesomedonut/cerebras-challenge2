@@ -56,14 +56,40 @@ function Barcode({ value }: { value: string }) {
   return <svg ref={svgRef} className="max-w-full h-auto" />;
 }
 
+/** QR code for long values like locations -- scans reliably from phone cameras. */
+function QRCode({ value }: { value: string }) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    import("qrcode").then((mod) => {
+      if (cancelled || !canvasRef.current) return;
+      mod.toCanvas(canvasRef.current, value, {
+        width: 200,
+        margin: 2,
+      });
+    });
+    return () => { cancelled = true; };
+  }, [value]);
+
+  return (
+    <div>
+      <canvas ref={canvasRef} className="mx-auto" />
+      <p className="font-mono text-fine-print text-muted mt-1 break-all">{value}</p>
+    </div>
+  );
+}
+
 // --- Section component ---
 
 function BarcodeSection({
   title,
   items,
+  useQR = false,
 }: {
   title: string;
   items: { value: string; note: string }[];
+  useQR?: boolean;
 }) {
   return (
     <section>
@@ -73,7 +99,7 @@ function BarcodeSection({
       <div className="grid sm:grid-cols-2 gap-4">
         {items.map((item) => (
           <div key={item.value} className="card text-center overflow-hidden">
-            <Barcode value={item.value} />
+            {useQR ? <QRCode value={item.value} /> : <Barcode value={item.value} />}
             <p className="text-caption text-muted mt-2">{item.note}</p>
           </div>
         ))}
@@ -93,8 +119,8 @@ export default function BarcodesPage() {
             Barcode Reference
           </h1>
           <p className="text-caption text-muted mt-1">
-            Scannable Code 128 barcodes for testing. Print this page or scan
-            directly from the screen.
+            Code 128 barcodes for tags and badges, QR codes for locations
+            (longer strings scan more reliably as QR from phone cameras).
           </p>
         </div>
         <Button
@@ -107,7 +133,7 @@ export default function BarcodesPage() {
       </div>
 
       <BarcodeSection title="Asset Tags" items={ASSET_TAGS} />
-      <BarcodeSection title="Location Barcodes" items={LOCATIONS} />
+      <BarcodeSection title="Location Barcodes (QR)" items={LOCATIONS} useQR />
       <BarcodeSection title="Badge Barcodes (Transfer)" items={BADGES} />
     </div>
   );
