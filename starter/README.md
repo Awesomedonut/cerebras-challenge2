@@ -46,9 +46,9 @@ I did *not* create server-side routes for receive and transfer. They have no wri
 
 The API returns all ~1,000 assets in one response with no pagination parameters. I paginate client-side at 25 per page. The alternative was to add server-side pagination (cursor or offset) by extending the proxy. I decided against it because: the dataset is small enough that a single fetch is fast (~200ms), client-side filtering and sorting are instant after the first load, and adding pagination to the proxy would mean either caching state on the server or re-fetching on every page change. For 1,000 rows, the simpler approach wins. If the dataset grew to 50k, I'd revisit.
 
-### 3. Shared scan reducer factory vs. separate reducers per page
+### 3. Receive as scan-tag-first vs. single-screen form
 
-Each scan page has its own `useReducer` with its own types and step definitions. A factory function could generate these from a config object, reducing boilerplate. I kept them separate because: each workflow has different steps (receive has a form, transfer has a badge scan, deploy has location validation), the reducer logic diverges enough that a generic factory would need escape hatches everywhere, and having the full state machine visible in each file makes it easy to understand the flow without jumping to an abstraction. Three similar files are better than one clever file that's hard to follow.
+I nearly put all receive fields on one screen -- tag, serial, model, manufacturer, asset class, location -- and let the tech fill everything at once. Fewer steps, faster for an experienced tech who knows the routine. I split it into scan-tag-first, then form, because: the tag scan validates format immediately before the tech types five fields, duplicate and serial-mismatch detection happens before any manual input (saving wasted effort if the tag is already in the system), and it matches the physical flow -- you pick up the instrument, scan the label on the box, then look at the paperwork. The trade-off is an extra step for every receive. But the cost of filling five fields and then discovering a serial conflict is worse than scanning one barcode first.
 
 ## Pushback on the brief and starter
 
