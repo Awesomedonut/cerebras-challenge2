@@ -26,8 +26,9 @@ export function formatLocation(loc: Location): string {
 }
 
 /** Slash-joined string matching facilities rack_location format.
- *  Preserves all five positional segments so site//rack/ru stays
- *  distinguishable from site/rack/ru during reconciliation comparison. */
+ *  Uses filter(Boolean) to drop null segments -- matches how the
+ *  API seed builds rack_location in procedural.ts. Both sides must
+ *  use the same format for reconciliation comparison to work. */
 export function toRackLocationString(loc: Location): string {
   return [loc.site, loc.room, loc.row, loc.rack, loc.ru]
     .filter(Boolean)
