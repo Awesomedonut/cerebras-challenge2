@@ -99,6 +99,11 @@ export function ScanInput({
             </button>
           )}
         </div>
+        {!isMobile && (
+          <p className="text-fine-print text-muted mt-1.5">
+            On desktop, there is no camera scanner. Connect a USB or handheld scanner, it reads directly into this field. On a phone, the camera button appears automatically.
+          </p>
+        )}
       </label>
 
       {isMobile && cameraOpen && (
