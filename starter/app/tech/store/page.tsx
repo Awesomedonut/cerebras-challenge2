@@ -33,6 +33,7 @@ type Action =
   | { type: "SUCCESS"; result: ScanResponse }
   | { type: "ERROR"; title: string; detail: string }
   | { type: "RESET" }
+  | { type: "RETRY_LOCATION" }
   | { type: "RETRY_TAG" };
 
 const INITIAL: State = { step: "scan_tag", asset: null, result: null, error: null };
@@ -56,6 +57,8 @@ function reducer(state: State, action: Action): State {
       return { ...state, step: "success", result: action.result, error: null };
     case "ERROR":
       return { ...state, step: "error", error: { title: action.title, detail: action.detail } };
+    case "RETRY_LOCATION":
+      return { ...state, step: "scan_location", error: null };
     case "RETRY_TAG":
       return { ...INITIAL, step: "scan_tag" };
     case "RESET":
@@ -130,7 +133,11 @@ export default function TechStorePage() {
             {state.error.detail}
           </Alert>
           <div className="flex gap-3">
-            <Button onClick={() => dispatch({ type: "RETRY_TAG" })}>Scan a different tag</Button>
+            {state.asset && state.error.title === "Invalid location" ? (
+              <Button onClick={() => dispatch({ type: "RETRY_LOCATION" })}>Scan location again</Button>
+            ) : (
+              <Button onClick={() => dispatch({ type: "RETRY_TAG" })}>Scan a different tag</Button>
+            )}
           </div>
         </div>
       )}

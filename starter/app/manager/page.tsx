@@ -41,6 +41,7 @@ export default function ManagerListPage() {
   const [stateFilter, setStateFilter] = useState("");
   const [siteFilter, setSiteFilter] = useState("");
   const [custodianFilter, setCustodianFilter] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Pagination
   const [page, setPage] = useState(1);
@@ -73,6 +74,14 @@ export default function ManagerListPage() {
   // Filter
   const filtered = useMemo(() => {
     let result = assets;
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      result = result.filter((a) =>
+        a.asset_tag.toLowerCase().includes(q) ||
+        a.serial.toLowerCase().includes(q) ||
+        a.model.toLowerCase().includes(q),
+      );
+    }
     if (stateFilter) result = result.filter((a) => a.state === stateFilter);
     if (siteFilter) result = result.filter((a) => a.location.site === siteFilter);
     if (custodianFilter) {
@@ -80,7 +89,7 @@ export default function ManagerListPage() {
       result = result.filter((a) => a.custodian.toLowerCase().includes(q));
     }
     return result;
-  }, [assets, stateFilter, siteFilter, custodianFilter]);
+  }, [assets, searchQuery, stateFilter, siteFilter, custodianFilter]);
 
   // Sort
   const sorted = useMemo(() => {
@@ -100,7 +109,7 @@ export default function ManagerListPage() {
   const paginated = sorted.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   // Reset page when filters change
-  useEffect(() => setPage(1), [stateFilter, siteFilter, custodianFilter]);
+  useEffect(() => setPage(1), [searchQuery, stateFilter, siteFilter, custodianFilter]);
 
   function toggleSort(key: SortKey) {
     if (sortKey === key) {
@@ -159,8 +168,19 @@ export default function ManagerListPage() {
         ))}
       </div>
 
-      {/* Filters */}
+      {/* Search + Filters */}
       <div className="card flex flex-wrap items-end gap-3">
+        <label className="block flex-1 min-w-[200px]">
+          <span className="block text-fine-print text-muted mb-1">Search</span>
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Tag, serial, or model..."
+            className="w-full p-2 rounded-card border border-border text-caption bg-canvas focus:border-action focus:outline-none"
+          />
+        </label>
+
         <label className="block">
           <span className="block text-fine-print text-muted mb-1">State</span>
           <select
@@ -204,9 +224,10 @@ export default function ManagerListPage() {
           />
         </label>
 
-        {(stateFilter || siteFilter || custodianFilter) && (
+        {(searchQuery || stateFilter || siteFilter || custodianFilter) && (
           <button
             onClick={() => {
+              setSearchQuery("");
               setStateFilter("");
               setSiteFilter("");
               setCustodianFilter("");
