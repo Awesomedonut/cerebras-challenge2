@@ -206,8 +206,12 @@ function ReceiveForm({ tag, onSubmit, onCancel }: {
             autoFocus={false}
           />
           <input ref={locationRef} name="location" required
-            className="w-full p-3 rounded-card border border-border text-body focus:border-action focus:outline-none mt-2"
+            className="peer w-full p-3 rounded-card border border-border text-body focus:border-action focus:outline-none mt-2
+              invalid:[&:not(:placeholder-shown)]:border-red-400"
             placeholder="Lab-Building-A/Receiving//DOCK-2/" />
+          <span className="hidden peer-[&:not(:placeholder-shown)]:peer-invalid:block text-fine-print text-red-500 mt-1">
+            Location is required
+          </span>
           <p className="text-fine-print text-muted mt-1">
             Format: site/room/row/rack/ru -- leave segments empty for nulls
           </p>
@@ -229,8 +233,12 @@ function FormInput({ label, name, placeholder, autoFocus }: {
     <label className="block">
       <span className="block text-caption-strong font-semibold text-headline mb-1">{label}</span>
       <input name={name} required autoFocus={autoFocus} autoComplete="off"
-        className="w-full p-3 rounded-card border border-border text-body focus:border-action focus:outline-none"
+        className="peer w-full p-3 rounded-card border border-border text-body focus:border-action focus:outline-none
+          invalid:[&:not(:placeholder-shown)]:border-red-400"
         placeholder={placeholder} />
+      <span className="hidden peer-[&:not(:placeholder-shown)]:peer-invalid:block text-fine-print text-red-500 mt-1">
+        {label} is required
+      </span>
     </label>
   );
 }
