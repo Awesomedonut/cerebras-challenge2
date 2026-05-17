@@ -11,7 +11,7 @@ pnpm dev          # API on :8080, starter on :3000
 ```
 
 ```bash
-pnpm test         # 19 tests
+pnpm test         # 26 tests
 pnpm typecheck
 pnpm lint
 ```

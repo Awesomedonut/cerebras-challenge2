@@ -21,7 +21,7 @@ Copy `starter/.env.example` to `starter/.env` if you don't have one. The default
 | `API_TOKEN` | Server-only bearer token. Never prefixed with `NEXT_PUBLIC_`. Browser code goes through `/api/upstream/*` which attaches it. |
 
 ```bash
-pnpm test         # 19 tests (ScanInput + reconciliation + write-back)
+pnpm test         # 26 tests
 pnpm typecheck    # tsc --noEmit
 ```
 
@@ -106,10 +106,11 @@ Write-backs live in server-side route handlers so the API token never reaches th
 
 ## Testing
 
-19 tests across three suites:
+26 tests across four suites:
 
 - **ScanInput** (3 tests) -- fires on Enter with trimmed value, ignores empty submissions, clears input after firing.
 - **Reconciliation** (10 tests) -- every drift category (location drift, disposed-but-capitalized, ghost in facilities, finance orphan, stale facilities, missing from finance, expected absences), the multi-category case (C0000109 appears in both disposed_but_capitalized and stale_facilities), and the 502 error when the API is unreachable.
 - **Write-back routes** (6 tests) -- deploy writes to facilities and finance on success, surfaces sync_warnings when either fails. Store de-racks from facilities when storing an in-service asset, skips write-back for received assets, surfaces warnings on failure.
+- **Location parsing** (7 tests) -- parseLocation handles full and partial segments, toRackLocationString matches the facilities seed format (contract test ensuring reconciliation comparison works), isDeployComplete validates required fields, formatLocation skips nulls.
 
-I tested reconciliation and write-backs because they're the most complex server-side logic. I did not unit-test individual scan pages because their logic is thin -- the API enforces the state machine, and the pages are mostly wiring.
+I tested reconciliation, write-backs, and location serialization because they're the complex server-side logic where bugs hide. I did not unit-test individual scan pages because their logic is thin -- the API enforces the state machine, and the pages are mostly wiring.
