@@ -87,9 +87,17 @@ function CameraScannerInner({ onScan, onClose }: CameraScannerProps) {
       } catch (err) {
         if (!cancelled) {
           const isDenied = err instanceof DOMException && err.name === "NotAllowedError";
-          const message = isDenied
-              ? "Camera permission was denied. To fix: tap the lock/camera icon in your browser's address bar, allow camera access, and reload the page. Or close this and type the value manually."
-              : "Could not access camera. Your device may not have a camera, or another app may be using it. Close this and type the value manually.";
+          const isMobile = /iPhone|iPad|Android/i.test(navigator.userAgent);
+          let message: string;
+          if (isDenied && isMobile) {
+            message = "Camera permission was denied. Tap the lock icon in your browser's address bar, allow camera access, and reload the page.";
+          } else if (isDenied) {
+            message = "Camera permission was denied. On desktop, use the \"Close\" button below and type or scan the value into the text input with a USB/Bluetooth handheld scanner.";
+          } else if (!isMobile) {
+            message = "No camera detected. Use the \"Close\" button below and type the value into the text input, or scan with a USB/Bluetooth handheld scanner.";
+          } else {
+            message = "Could not access camera. Another app may be using it. Use the \"Close\" button below and try opening the camera again.";
+          }
           setError(message);
         }
       }
@@ -133,7 +141,7 @@ function CameraScannerInner({ onScan, onClose }: CameraScannerProps) {
               className="px-5 py-2 rounded-pill bg-white/20 text-white text-caption
                 hover:bg-white/30 active:scale-[0.95] transition-all min-h-[44px]"
             >
-              Close and type manually
+              Close
             </button>
           </div>
         ) : (
