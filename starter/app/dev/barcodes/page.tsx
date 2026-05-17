@@ -119,8 +119,8 @@ export default function BarcodesPage() {
             Barcode Reference
           </h1>
           <p className="text-caption text-muted mt-1">
-            Code 128 barcodes for tags and badges, QR codes for locations
-            (longer strings scan more reliably as QR from phone cameras).
+            Scannable QR codes for testing. Print this page or scan directly
+            from the screen with your phone camera.
           </p>
         </div>
         <Button
@@ -132,9 +132,9 @@ export default function BarcodesPage() {
         </Button>
       </div>
 
-      <BarcodeSection title="Asset Tags" items={ASSET_TAGS} />
-      <BarcodeSection title="Location Barcodes (QR)" items={LOCATIONS} useQR />
-      <BarcodeSection title="Badge Barcodes (Transfer)" items={BADGES} />
+      <BarcodeSection title="Asset Tags" items={ASSET_TAGS} useQR />
+      <BarcodeSection title="Location Barcodes" items={LOCATIONS} useQR />
+      <BarcodeSection title="Badge Barcodes (Transfer)" items={BADGES} useQR />
     </div>
   );
 }
