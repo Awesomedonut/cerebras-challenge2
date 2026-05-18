@@ -5,6 +5,7 @@ A frontend for a multi-site research lab asset tracking system. Technicians scan
 Built with Next.js 15 (App Router), TypeScript, and Tailwind CSS.
 
 **Live demo:** https://challenge.whyjs.com
+**Loom walkthrough:** https://www.loom.com/share/511d264bc7e0445887b51a235ff8b795
 
 ## Running locally
 
